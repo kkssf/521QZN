@@ -3,20 +3,27 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D音乐相册带玫瑰花飘落</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D音乐相册</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
             background: #000;
             overflow: hidden;
+            touch-action: manipulation;
             font-family: Arial, sans-serif;
-            position: relative;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
         
         /* 玫瑰花背景 */
-        .petals {
+        .petals-container {
             position: absolute;
             top: 0;
             left: 0;
@@ -24,14 +31,15 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
+            overflow: hidden;
         }
         
         .petal {
             position: absolute;
+            width: 25px;
+            height: 25px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23ff3366" d="M50 10C60 20 70 30 80 40C90 50 80 60 70 70C60 80 50 90 40 80C30 70 20 60 10 50C0 40 10 30 20 20C30 10 40 0 50 10Z"/></svg>');
             background-size: contain;
-            width: 30px;
-            height: 30px;
             opacity: 0.7;
             animation: falling linear infinite;
         }
@@ -53,11 +61,11 @@
             }
         }
         
-        /* 3D相册 */
+        /* 3D相册容器 */
         .album-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -66,11 +74,18 @@
         }
         
         .carousel {
-            width: 300px;
-            height: 200px;
+            width: 80vw;
+            height: 50vh;
             position: relative;
             transform-style: preserve-3d;
             animation: rotate 20s infinite linear;
+        }
+        
+        @media (max-width: 480px) {
+            .carousel {
+                width: 90vw;
+                height: 60vw;
+            }
         }
         
         .carousel:hover {
@@ -79,20 +94,22 @@
         
         .photo {
             position: absolute;
-            width: 300px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
             background-size: cover;
             background-position: center;
-            border: 2px solid white;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
             opacity: 0.9;
-            transition: all 0.5s;
+            transition: all 0.3s;
+            backface-visibility: hidden;
         }
         
         .photo:hover {
             opacity: 1;
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255,255,255,0.8);
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
         }
         
         @keyframes rotate {
@@ -109,33 +126,60 @@
             z-index: 100;
             color: white;
             text-align: center;
+            width: 90%;
+            max-width: 300px;
         }
         
         .music-control {
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
+            backdrop-filter: blur(5px);
+            width: 100%;
+        }
+        
+        /* 触摸控制提示 */
+        .touch-hint {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 10;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .touch-hint {
+                display: block;
+            }
         }
     </style>
 </head>
 <body>
     <!-- 玫瑰花背景 -->
-    <div class="petals" id="petals"></div>
+    <div class="petals-container" id="petals"></div>
     
     <!-- 3D相册 -->
     <div class="album-container">
         <div class="carousel" id="carousel"></div>
     </div>
     
+    <!-- 触摸提示 -->
+    <div class="touch-hint">触摸暂停/播放相册</div>
+    
     <!-- 音乐播放器 -->
     <div class="music-player">
         <audio id="bg-music" loop>
             <source src="https://music.163.com/song/media/outer/url?id=1330348068.mp3" type="audio/mpeg">
-            您的浏览器不支持音频元素
         </audio>
         <button class="music-control" id="music-control">播放音乐</button>
     </div>
@@ -148,9 +192,7 @@
             'https://picsum.photos/800/600?random=3',
             'https://picsum.photos/800/600?random=4',
             'https://picsum.photos/800/600?random=5',
-            'https://picsum.photos/800/600?random=6',
-            'https://picsum.photos/800/600?random=7',
-            'https://picsum.photos/800/600?random=8'
+            'https://picsum.photos/800/600?random=6'
         ];
         
         // 创建3D相册
@@ -160,20 +202,24 @@
             const photoElement = document.createElement('div');
             photoElement.className = 'photo';
             photoElement.style.backgroundImage = `url(${photo})`;
-            photoElement.style.transform = `rotateY(${angle}deg) translateZ(400px)`;
+            photoElement.style.transform = `rotateY(${angle}deg) translateZ(${Math.min(window.innerWidth, window.innerHeight) * 0.8}px)`;
             carousel.appendChild(photoElement);
         });
         
         // 创建玫瑰花飘落效果
         const petalsContainer = document.getElementById('petals');
         function createPetals() {
-            for (let i = 0; i < 30; i++) {
+            const petalCount = window.innerWidth < 768 ? 20 : 30;
+            
+            for (let i = 0; i < petalCount; i++) {
                 const petal = document.createElement('div');
                 petal.className = 'petal';
                 petal.style.left = Math.random() * 100 + 'vw';
-                petal.style.animationDuration = 5 + Math.random() * 10 + 's';
+                petal.style.width = (15 + Math.random() * 15) + 'px';
+                petal.style.height = petal.style.width;
+                petal.style.animationDuration = (5 + Math.random() * 10) + 's';
                 petal.style.animationDelay = Math.random() * 5 + 's';
-                petal.style.setProperty('--end-x', (Math.random() * 200 - 100) + 'px');
+                petal.style.setProperty('--end-x', (Math.random() * 100 - 50) + 'px');
                 petalsContainer.appendChild(petal);
             }
         }
@@ -183,15 +229,40 @@
         const music = document.getElementById('bg-music');
         const musicControl = document.getElementById('music-control');
         let isPlaying = false;
-        musicControl.addEventListener('click', () => {
+        
+        function toggleMusic() {
             if(isPlaying) {
                 music.pause();
                 musicControl.textContent = '播放音乐';
             } else {
-                music.play();
+                music.play().catch(e => {
+                    musicControl.textContent = '点击播放音乐';
+                });
                 musicControl.textContent = '暂停音乐';
             }
             isPlaying = !isPlaying;
+        }
+        
+        musicControl.addEventListener('click', toggleMusic);
+        
+        // 触摸控制相册旋转
+        carousel.addEventListener('touchstart', () => {
+            if (carousel.style.animationPlayState === 'paused') {
+                carousel.style.animationPlayState = 'running';
+            } else {
+                carousel.style.animationPlayState = 'paused';
+            }
+        });
+        
+        // 响应式调整
+        window.addEventListener('resize', () => {
+            const photos = document.querySelectorAll('.photo');
+            const translateZ = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+            
+            photos.forEach((photo, index) => {
+                const angle = (360 / photos.length) * index;
+                photo.style.transform = `rotateY(${angle}deg) translateZ(${translateZ}px)`;
+            });
         });
     </script>
 </body>
