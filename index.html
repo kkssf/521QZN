@@ -135,12 +135,12 @@
     <script>
         // 照片设置
         const photos = [
-            'https://picsum.photos/800/600?random=1',
-            'https://picsum.photos/800/600?random=2',
-            'https://picsum.photos/800/600?random=3',
-            'https://picsum.photos/800/600?random=4',
-            'https://picsum.photos/800/600?random=5',
-            'https://picsum.photos/800/600?random=6'
+            './1.jpg',
+            './2.jpg',
+            './3.jpg',
+            './4.jpg',
+            './5.jpg',
+            './6.jpg'
         ];
         document.querySelectorAll('.cube-face').forEach((face, i) => {
             if(photos[i]) face.style.backgroundImage = `url(${photos[i]})`;
