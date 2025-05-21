@@ -61,6 +61,7 @@
             position: relative;
             transform-style: preserve-3d;
             transform: rotateX(-15deg) rotateY(15deg);
+            animation: autoRotate 15s infinite linear;
         }
         @media (max-width: 480px) {
             .cube { width: 150px; height: 150px; }
@@ -82,6 +83,11 @@
         .cube-face.left   { transform: rotateY(-90deg) translateZ(100px); }
         .cube-face.top    { transform: rotateX(90deg) translateZ(100px); }
         .cube-face.bottom { transform: rotateX(-90deg) translateZ(100px); }
+        
+        @keyframes autoRotate {
+            0% { transform: rotateX(-15deg) rotateY(0deg); }
+            100% { transform: rotateX(-15deg) rotateY(360deg); }
+        }
         
         /* 音乐播放器 */
         .music-player {
@@ -167,13 +173,27 @@
             isPlaying = !isPlaying;
         });
         
-        // 触摸旋转控制
+        // 立方体旋转控制
         const cube = document.getElementById('cube');
         let startX, startY, rotateX = -15, rotateY = 15;
+        let autoRotateTimer = null;
+        let isAutoRotating = true;
+        
+        function resetAutoRotate() {
+            if(autoRotateTimer) clearTimeout(autoRotateTimer);
+            autoRotateTimer = setTimeout(() => {
+                cube.style.animation = 'autoRotate 15s infinite linear';
+                isAutoRotating = true;
+            }, 3000);
+        }
+        
         cube.addEventListener('touchstart', (e) => {
+            cube.style.animation = 'none';
+            isAutoRotating = false;
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
         });
+        
         cube.addEventListener('touchmove', (e) => {
             if(!startX || !startY) return;
             const x = e.touches[0].clientX;
@@ -183,6 +203,7 @@
             cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             startX = x;
             startY = y;
+            resetAutoRotate();
         });
         
         // 响应式调整
