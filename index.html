@@ -4,22 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D音乐相册</title>
+    <title>3D立方体相册</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: #000;
-            overflow: hidden;
-            touch-action: manipulation;
-            font-family: Arial, sans-serif;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #000; 
+            overflow: hidden; 
+            touch-action: none; 
+            font-family: Arial, sans-serif; 
+            position: fixed; 
+            width: 100%; 
+            height: 100%; 
         }
         
         /* 玫瑰花背景 */
@@ -33,37 +28,25 @@
             z-index: 0;
             overflow: hidden;
         }
-        
         .petal {
             position: absolute;
-            width: 25px;
-            height: 25px;
+            width: 20px;
+            height: 20px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23ff3366" d="M50 10C60 20 70 30 80 40C90 50 80 60 70 70C60 80 50 90 40 80C30 70 20 60 10 50C0 40 10 30 20 20C30 10 40 0 50 10Z"/></svg>');
             background-size: contain;
             opacity: 0.7;
             animation: falling linear infinite;
         }
-        
         @keyframes falling {
-            0% {
-                transform: translate(0, -10%) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.7;
-            }
-            90% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translate(var(--end-x), 100vh) rotate(360deg);
-                opacity: 0;
-            }
+            0% { transform: translate(0, -10%) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translate(var(--end-x), 100vh) rotate(360deg); opacity: 0; }
         }
         
-        /* 3D相册容器 */
-        .album-container {
-            position: relative;
+        /* 3D立方体容器 */
+        .scene {
+            position: absolute;
             width: 100%;
             height: 100%;
             display: flex;
@@ -72,50 +55,33 @@
             perspective: 1000px;
             z-index: 1;
         }
-        
-        .carousel {
-            width: 80vw;
-            height: 50vh;
+        .cube {
+            width: 200px;
+            height: 200px;
             position: relative;
             transform-style: preserve-3d;
-            animation: rotate 20s infinite linear;
+            transform: rotateX(-15deg) rotateY(15deg);
         }
-        
         @media (max-width: 480px) {
-            .carousel {
-                width: 90vw;
-                height: 60vw;
-            }
+            .cube { width: 150px; height: 150px; }
         }
-        
-        .carousel:hover {
-            animation-play-state: paused;
-        }
-        
-        .photo {
+        .cube-face {
             position: absolute;
             width: 100%;
             height: 100%;
             background-size: cover;
             background-position: center;
             border: 2px solid rgba(255,255,255,0.5);
-            border-radius: 5px;
             box-shadow: 0 0 15px rgba(255,255,255,0.3);
             opacity: 0.9;
-            transition: all 0.3s;
             backface-visibility: hidden;
         }
-        
-        .photo:hover {
-            opacity: 1;
-            transform: scale(1.03);
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
-        }
-        
-        @keyframes rotate {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
+        .cube-face.front  { transform: rotateY(0deg) translateZ(100px); }
+        .cube-face.back   { transform: rotateY(180deg) translateZ(100px); }
+        .cube-face.right  { transform: rotateY(90deg) translateZ(100px); }
+        .cube-face.left   { transform: rotateY(-90deg) translateZ(100px); }
+        .cube-face.top    { transform: rotateX(90deg) translateZ(100px); }
+        .cube-face.bottom { transform: rotateX(-90deg) translateZ(100px); }
         
         /* 音乐播放器 */
         .music-player {
@@ -127,9 +93,8 @@
             color: white;
             text-align: center;
             width: 90%;
-            max-width: 300px;
+            max-width: 250px;
         }
-        
         .music-control {
             background: rgba(255,255,255,0.2);
             border: none;
@@ -141,51 +106,28 @@
             backdrop-filter: blur(5px);
             width: 100%;
         }
-        
-        /* 触摸控制提示 */
-        .touch-hint {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 10;
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .touch-hint {
-                display: block;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- 玫瑰花背景 -->
     <div class="petals-container" id="petals"></div>
-    
-    <!-- 3D相册 -->
-    <div class="album-container">
-        <div class="carousel" id="carousel"></div>
+    <div class="scene">
+        <div class="cube" id="cube">
+            <div class="cube-face front"></div>
+            <div class="cube-face back"></div>
+            <div class="cube-face right"></div>
+            <div class="cube-face left"></div>
+            <div class="cube-face top"></div>
+            <div class="cube-face bottom"></div>
+        </div>
     </div>
-    
-    <!-- 触摸提示 -->
-    <div class="touch-hint">触摸暂停/播放相册</div>
-    
-    <!-- 音乐播放器 -->
     <div class="music-player">
         <audio id="bg-music" loop>
             <source src="https://music.163.com/song/media/outer/url?id=1330348068.mp3" type="audio/mpeg">
         </audio>
         <button class="music-control" id="music-control">播放音乐</button>
     </div>
-    
     <script>
-        // 照片数组 - 替换为你自己的照片URL
+        // 照片设置
         const photos = [
             'https://picsum.photos/800/600?random=1',
             'https://picsum.photos/800/600?random=2',
@@ -194,74 +136,64 @@
             'https://picsum.photos/800/600?random=5',
             'https://picsum.photos/800/600?random=6'
         ];
-        
-        // 创建3D相册
-        const carousel = document.getElementById('carousel');
-        photos.forEach((photo, index) => {
-            const angle = (360 / photos.length) * index;
-            const photoElement = document.createElement('div');
-            photoElement.className = 'photo';
-            photoElement.style.backgroundImage = `url(${photo})`;
-            photoElement.style.transform = `rotateY(${angle}deg) translateZ(${Math.min(window.innerWidth, window.innerHeight) * 0.8}px)`;
-            carousel.appendChild(photoElement);
+        document.querySelectorAll('.cube-face').forEach((face, i) => {
+            if(photos[i]) face.style.backgroundImage = `url(${photos[i]})`;
         });
         
-        // 创建玫瑰花飘落效果
-        const petalsContainer = document.getElementById('petals');
+        // 玫瑰花效果
         function createPetals() {
-            const petalCount = window.innerWidth < 768 ? 20 : 30;
-            
-            for (let i = 0; i < petalCount; i++) {
+            const container = document.getElementById('petals');
+            for(let i = 0; i < 20; i++) {
                 const petal = document.createElement('div');
                 petal.className = 'petal';
                 petal.style.left = Math.random() * 100 + 'vw';
-                petal.style.width = (15 + Math.random() * 15) + 'px';
+                petal.style.width = (15 + Math.random() * 10) + 'px';
                 petal.style.height = petal.style.width;
                 petal.style.animationDuration = (5 + Math.random() * 10) + 's';
                 petal.style.animationDelay = Math.random() * 5 + 's';
-                petal.style.setProperty('--end-x', (Math.random() * 100 - 50) + 'px');
-                petalsContainer.appendChild(petal);
+                petal.style.setProperty('--end-x', (Math.random() * 80 - 40) + 'px');
+                container.appendChild(petal);
             }
         }
         createPetals();
         
         // 音乐控制
         const music = document.getElementById('bg-music');
-        const musicControl = document.getElementById('music-control');
+        const musicBtn = document.getElementById('music-control');
         let isPlaying = false;
-        
-        function toggleMusic() {
-            if(isPlaying) {
-                music.pause();
-                musicControl.textContent = '播放音乐';
-            } else {
-                music.play().catch(e => {
-                    musicControl.textContent = '点击播放音乐';
-                });
-                musicControl.textContent = '暂停音乐';
-            }
+        musicBtn.addEventListener('click', () => {
+            isPlaying ? music.pause() : music.play().catch(e => {});
+            musicBtn.textContent = isPlaying ? '播放音乐' : '暂停音乐';
             isPlaying = !isPlaying;
-        }
+        });
         
-        musicControl.addEventListener('click', toggleMusic);
-        
-        // 触摸控制相册旋转
-        carousel.addEventListener('touchstart', () => {
-            if (carousel.style.animationPlayState === 'paused') {
-                carousel.style.animationPlayState = 'running';
-            } else {
-                carousel.style.animationPlayState = 'paused';
-            }
+        // 触摸旋转控制
+        const cube = document.getElementById('cube');
+        let startX, startY, rotateX = -15, rotateY = 15;
+        cube.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        cube.addEventListener('touchmove', (e) => {
+            if(!startX || !startY) return;
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+            rotateY += (x - startX) * 0.5;
+            rotateX -= (y - startY) * 0.5;
+            cube.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            startX = x;
+            startY = y;
         });
         
         // 响应式调整
         window.addEventListener('resize', () => {
-            const photos = document.querySelectorAll('.photo');
-            const translateZ = Math.min(window.innerWidth, window.innerHeight) * 0.8;
-            
-            photos.forEach((photo, index) => {
-                const angle = (360 / photos.length) * index;
-                photo.style.transform = `rotateY(${angle}deg) translateZ(${translateZ}px)`;
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.4;
+            const z = size / 2;
+            cube.style.width = size + 'px';
+            cube.style.height = size + 'px';
+            document.querySelectorAll('.cube-face').forEach(face => {
+                const transform = face.style.transform.replace(/translateZ\([^)]+\)/, `translateZ(${z}px)`);
+                face.style.transform = transform;
             });
         });
     </script>
