@@ -64,7 +64,7 @@
             animation: autoRotate 15s infinite linear;
         }
         @media (max-width: 480px) {
-            .cube { width: 150px; height: 150px; }
+            .cube { width: 180px; height: 180px; }
         }
         .cube-face {
             position: absolute;
@@ -208,14 +208,14 @@
         
         // 响应式调整
         window.addEventListener('resize', () => {
-            const size = Math.min(window.innerWidth, window.innerHeight) * 0.4;
-            const z = size / 2;
-            cube.style.width = size + 'px';
-            cube.style.height = size + 'px';
-            document.querySelectorAll('.cube-face').forEach(face => {
-                const transform = face.style.transform.replace(/translateZ\([^)]+\)/, `translateZ(${z}px)`);
-                face.style.transform = transform;
-            });
+            // const size = Math.min(window.innerWidth, window.innerHeight) * 0.4;
+            // const z = size / 2;
+            // cube.style.width = size + 'px';
+            // cube.style.height = size + 'px';
+            // document.querySelectorAll('.cube-face').forEach(face => {
+            //     const transform = face.style.transform.replace(/translateZ\([^)]+\)/, `translateZ(${z}px)`);
+            //     face.style.transform = transform;
+            // });
         });
     </script>
 </body>
