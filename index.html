@@ -1,142 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>炫酷花朵</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: black;
-        }
-    </style>
+	<meta charset="UTF-8">
+	<title>521去整你</title>
+	<style>
+		*{margin: 0;padding: 0;}
+		html,body{height: 100%;}
+		body{
+			
+			display: flex;
+			
+			perspective: 1000px;
+			transform-style: preserve-3d;
+			background-image: url(images/star.jpg);
+			height:100%;
+			width: 100%;
+		}
+		#box{
+			position: relative;
+			display: flex;
+			width: 130px;
+			height: 200px;
+			margin: auto;
+			transform-style: preserve-3d; 
+			transform: rotateX(-10deg);
+		}
+		#box > div{
+			transform-style: preserve-3d; 
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			line-height: 200px;
+			font-size: 50px;
+			text-align: center;
+			box-shadow:0 0 10px #fff;
+			-webkit-box-reflect:below 10px -webkit-linear-gradient(top,rgba(0,0,0,0) 40%,rgba(0,0,0,.8) 100%);
+		}
+		/*  #box > div:nth-child(1){
+					background: skyblue;
+					transform: translate3d(0,0,300px) rotateY(45deg);
+				}
+				#box > div:nth-child(2){
+					background: pink;
+					transform: rotateY(0deg);
+				}
+				#box > div:nth-child(3){
+					background: purple;
+					transform: translate3d(0,0,300px) rotateY(-45deg);
+				} 
+		*/
+		#box p{
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			margin: auto;
+			width: 1200px;
+			height: 1200px;
+			background: -webkit-radial-gradient(center center,600px 600px,rgba(50,50,50,1),rgba(0,0,0,0));
+			border-radius: 50%;
+			transform: rotateX(90deg) translate3d(-600px,0,-105px);
+		}
+	</style>
 </head>
 <body>
-    <!-- 在这里创建一个canvas元素，用于绘制图形 -->
-    <canvas id="c"></canvas>
-    
-    <!-- 开始JavaScript脚本 -->
-    <script>
-        // 获取canvas元素及其上下文
-        var C = document.getElementById("c");
-        var Ctx = C.getContext("2d");
-        
-        // 设置canvas的宽度和高度
-        var Cw = C.width = window.innerWidth,
-            Cx = Cw / 2;
-        var Ch = C.height = window.innerHeight,
-            Cy = Ch / 2;
- 
-        // 创建一个临时canvas元素及其上下文，用于绘制花瓣
-        var c = document.createElement("canvas");
-        var ctx = c.getContext("2d");
-        var cw = c.width = 400,
-            cx = cw / 2;
-        var ch = c.height = 400,
-            cy = ch / 2;
-        
-        // 定义一些绘制花朵所需要的变量
-        var rad = Math.PI / 180;
-        var frames = 0;
-        var stopped = true;
-        var Rx = 150,
-            Ry = 150,
-            kx = 3,
-            ky = 4,
-            x, y, x1, y1, x2, y2, t;
-        var petals = 7;
- 
-        // 设置临时canvas的线条宽度
-        ctx.lineWidth = .25;
- 
-        // 将坐标原点移动到canvas中心，并缩放画布
-        Ctx.translate(Cw / 2, Ch / 2);
-        Ctx.scale(.75, .75);
- 
-        // 定义绘制函数
-        function Draw() {
-            // 更新帧数
-            frames += .3;
-            
-            // 清空整个canvas
-            Ctx.clearRect(-Cw, -Ch, 2 * Cw, 2 * Ch);
-            
-            // 计算花朵的路径
-            t = frames * rad;
-            rx = Rx * Math.abs(Math.cos(t)) + 50;
-            ry = Ry * Math.abs(Math.sin(t)) + 50;
- 
-            x = cx + rx * Math.sin(kx * t + Math.PI / 2);
-            y = cy + ry * Math.sin(ky * t + Math.PI / 2);
- 
-            x1 = cx + rx * Math.sin(kx * t + Math.PI);
-            y1 = cy - ry * Math.sin(ky * t + Math.PI);
- 
-            x2 = cx + rx * Math.sin(kx * t);
-            y2 = cy - ry * Math.sin(ky * t);
- 
-            // 绘制花朵的路径曲线
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.quadraticCurveTo(x1, y1, x2, y2);
-            ctx.strokeStyle = "hsl(" + (frames % 360) + ", 100%, 50%)";
-            ctx.stroke();
-            ctx.globalCompositeOperation = "lighter";
- 
-            var img = c;
- 
-            // 绘制花瓣
-            for (var i = 0; i < petals; i++) {
-                Ctx.globalCompositeOperation = "source-over";
-                Ctx.drawImage(img, -200, -400);
-                Ctx.rotate(2 * Math.PI / petals);
-            }
- 
-            // 请求下一帧绘制
-            requestId = window.requestAnimationFrame(Draw);
-        }
- 
-        // 开始动画
-        function start() {
-            requestId = window.requestAnimationFrame(Draw);
-            stopped = false;
-        }
- 
-        // 停止动画
-        function stopAnim() {
-            if (requestId) {
-                window.cancelAnimationFrame(requestId);
-            }
-            stopped = true;
-        }
- 
-        // 在页面加载完成后开始动画
-        window.addEventListener("load", function() {
-            start();
-        }, false);
- 
-        // 清空临时canvas并重新开始动画
-        function cleanSlate() {
-            ctx.clearRect(0, 0, cw, ch);
-            stopped = true;
-            start();
-            
-            // 30秒后停止动画
-            window.setTimeout(function() {
-                stopAnim();
-            }, 30000);
-        }
- 
-        // 30秒后停止动画
-        window.setTimeout(function() {
-            stopAnim();
-        }, 30000);
- 
-        // 点击canvas时清空临时canvas并重新开始动画
-        C.addEventListener("click", function() {
-            cleanSlate();
-        }, false);
-    </script>
+<div id="box">
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<div></div>
+	<p></p>
+</div>
+<script>
+setTimeout(init,100);
+function init(){
+	var obox = document.getElementById('box'),
+		aDiv = obox.getElementsByTagName('div');
+		
+		for (var i = 0; i < aDiv.length; i++) {
+			aDiv[i].style.background = "url(images/"+(i+1)+".jpg) center/cover";
+			aDiv[i].style.transform = "rotateY("+(i*36)+"deg) translate3d(0,0,350px)";
+			aDiv[i].style.transition = "transform 1s "+(aDiv.length-i)*0.2+"s";
+		}
+	var sX,
+		sY,
+		nX,
+		nY,
+		desX = 0,
+		desY = 0,
+		tX = 0,
+		tY = 10,
+		index = 0;//滚轮初始值
+	document.onmousedown = function(e){
+		clearInterval(obox.timer);
+		e = e || window.event;
+		var sX = e.clientX,
+			sY = e.clientY;
+			this.onmousemove = function(e){
+				e = e || window.event;
+				var nX = e.clientX,
+					nY = e.clientY;
+					 // 当前点的坐标和前一点的坐标差值
+					desX = nX - sX;
+					desY = nY - sY;
+                    tX += desX*0.1; 
+                    tY += desY*0.1;
+
+					obox.style.transform = "rotateX("+(-tY)+"deg) rotateY("+tX+"deg)";
+					sX = nX;
+					sY = nY;
+			}
+			this.onmouseup = function(){
+				this.onmousemove = this.onmouseup = null;
+				obox.timer = setInterval(function(){
+					desX *= 0.95;
+					desY *= 0.95;
+					tX += desX*0.1;
+					tY += desY*0.1;
+					obox.style.transform = "rotateX("+(-tY)+"deg) rotateY("+tX+"deg)";
+					if (Math.abs(desX)<0.5 && Math.abs(desY)<0.5) {
+						clearInterval(obox.timer);
+					}
+				},13);
+			}
+		return false;
+	}
+	//滚轮放大缩小
+	mousewheel(document,function(e){
+		e = e || window.event;
+		var d = e.wheelDelta/120 || -e.detail/3;
+			if (d>0) {
+				index-=20;
+			}else{
+				index+=30;
+			}
+			(index<(-1050)&&(index=(-1050)));
+		document.body.style.perspective = 1000 + index + "px";
+	})
+	function mousewheel(obj,fn){
+		document.onmousewheel===null?obj.onmousewheel=fn:addEvent(obj,"DOMMouseScroll",fn)
+	}
+	function addEvent(obj,eName,fn){
+		obj.attachEvent?obj.attachEvent("on"+eName,fn):obj.addEventListener(eName,fn);
+	}
+}
+</script>
 </body>
 </html>
